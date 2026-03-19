@@ -1,0 +1,10 @@
+# Ignore everything by default
+*
+
+# Track these files
+!.gitignore
+!CLAUDE.md
+!settings.json
+!commands/
+!commands/**
+!statusline.sh

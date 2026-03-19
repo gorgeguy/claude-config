@@ -1,0 +1,65 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run pbtourney *)",
+      "Bash(curl *)",
+      "Bash(cut *)",
+      "Bash(find *)",
+      "Bash(tree *)",
+      "Bash(git *)",
+      "Bash(git-merge-to-main*)",
+      "Bash(bd *)",
+      "Bash(oci *)",
+      "Bash(mgrep *)",
+      "Bash(npm run *)",
+      "Bash(pm *)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "hooks": {
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bd prime"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bd prime"
+          },
+          {
+            "type": "command",
+            "command": "echo '--- Port Allocations ---' && pm list 2>/dev/null || echo 'No pm allocations found'"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
+  },
+  "enabledPlugins": {
+    "example-skills@anthropic-agent-skills": false,
+    "frontend-design@claude-plugins-official": true,
+    "mgrep@Mixedbread-Grep": false,
+    "typescript-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "beads@beads-marketplace": true,
+    "slack@claude-plugins-official": true
+  },
+  "outputStyle": "Explanatory",
+  "effortLevel": "high",
+  "skipDangerousModePermissionPrompt": true
+}
