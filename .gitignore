@@ -3,6 +3,7 @@
 
 # Track these files
 !.gitignore
+!README.md
 !CLAUDE.md
 !settings.json
 !commands/
