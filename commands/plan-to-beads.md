@@ -3,12 +3,13 @@ description: Convert an implementation plan into self-contained Beads tickets op
 argument-hint: "<path-to-implementation-plan>"
 ---
 
-# Plan → Beads Tickets (Self-contained + Claimable + Parallel-safe)
+# Plan → Beads Tickets (Self-contained + Claimable + Parallel-safe + Self-correcting)
 
 Read and analyze `$ARGUMENTS` and create Beads epics + tasks that are:
 - Self-contained (no continuous plan reference required)
 - Small enough for one focused Claude/Codex session
 - Correctly dependency-linked so `bd ready` shows truly claimable work across multiple parallel terminals/worktrees
+- Self-correcting: each completed ticket propagates implementation reality to downstream tickets
 
 ## Labels (required)
 Create and apply to every issue:
@@ -26,6 +27,18 @@ Run:
 - `bd list --status=open`
 Do not create duplicates. If an equivalent issue exists, reuse it and do not recreate.
 
+## Plan Analysis (required — do this BEFORE creating any tickets)
+Before decomposing into tickets, write a brief synthesis of the plan covering:
+- **Gaps & Ambiguities**: anything underspecified, contradictory, or missing that would block implementation
+- **Key Design Decisions**: choices the plan makes (or defers) and their implications
+- **Rationale & Intent**: the overarching goals this plan serves, why this approach was chosen over alternatives, and what "success" looks like beyond just completing tasks
+- **Risks & Unknowns**: technical risk, integration risk, ordering risk, things that might change mid-execution
+- **Recommendations**: any suggested reorderings, splits, or scope adjustments before ticketing
+
+Include this synthesis as a comment or preamble in the output so that a future agent (or your future self) picking up this workstream cold understands not just *what* to build but *why* and *what to watch out for*.
+
+If the analysis surfaces ambiguities that would produce low-quality tickets, stop and ask for clarification before proceeding to ticket creation.
+
 ## Parse plan → work graph
 Extract:
 - Epics (major sections)
@@ -33,13 +46,13 @@ Extract:
 - Hard dependencies (must be complete first)
 - Soft dependencies (nice-to-have ordering; do NOT encode as blockers)
 - External blockers (access, credentials, approvals, unknowns)
-- Serialized/collision constraints (“exclusive locks”): schema/migrations, terraform/state, shared contracts, shared config
+- Serialized/collision constraints ("exclusive locks"): schema/migrations, terraform/state, shared contracts, shared config
 
 ## External blockers (required)
 For each external blocker, create a dedicated task issue:
 - Title starts with `Blocker: ...`
 - Label `blocked-external`
-- Includes: what’s needed, who/where, how to verify, and what becomes unblocked
+- Includes: what's needed, who/where, how to verify, and what becomes unblocked
 All dependent tasks must hard-depend on the blocker issue via `bd dep add`.
 
 ## Parallel-safety: collision/lock chaining (required)
@@ -47,7 +60,7 @@ Detect tasks that should not be worked concurrently because they touch the same 
 For each lock group (examples: `db-migrations`, `terraform-state`, `api-contract`, `shared-config`):
 - Choose the safest logical order (prefer earlier prerequisites first)
 - Add hard deps to CHAIN them in sequence so only the first is ready at a time.
-- Record the lock in each ticket under “Parallelism”.
+- Record the lock in each ticket under "Parallelism".
 
 Goal: two `bd ready` tickets should not cause merge conflicts or conflicting state updates in shared resources.
 
@@ -55,7 +68,7 @@ Goal: two `bd ready` tickets should not cause merge conflicts or conflicting sta
 Tickets must be sized so a single Claude Code session can implement them end-to-end.
 Split if any of these are true:
 - touches >3 subsystems OR >3 key files
-- mixes design decisions + implementation in one step (split “spike/decision” first)
+- mixes design decisions + implementation in one step (split "spike/decision" first)
 - unclear inputs (create a blocker/spike ticket)
 - acceptance criteria would exceed ~6 checkboxes
 
@@ -103,6 +116,26 @@ Plan section(s) and requirement IDs.
 - Hard deps: list (will be encoded via `bd dep add`)
 - Soft deps: notes only (no blockers)
 
+**## Completion Protocol**
+When closing this ticket, the completing agent MUST:
+1. **Record Actual Implementation**: what was built, key decisions made,
+   any deviations from the implementation plan above and why.
+   Add this as a closing comment on the ticket.
+2. **Update downstream tickets** that hard-depend on this one:
+   - Revise their Context Files if file paths or interfaces changed
+   - Revise their Implementation Plan if assumptions were invalidated
+   - Adjust Acceptance Criteria if scope shifted
+   - Add new dependencies or blockers discovered during implementation
+3. **Invalidation check**: if a downstream ticket is now obsolete or needs
+   significant redesign, add a comment explaining what changed and why,
+   and re-assign it to `needs-triage` status (or equivalent).
+4. **Surface emergent work**: if implementation revealed necessary work
+   not captured in any existing ticket, create new ticket(s) following
+   this same template, with proper labels, deps, and lock-group chaining.
+
+This protocol ensures the ticket graph is a living, self-correcting system —
+each completed ticket makes remaining tickets *more* accurate, not less.
+
 ## Creation order (required)
 1) Create epics
 2) Create tasks and attach to epics if Beads supports it (otherwise reference epic in body)
@@ -111,11 +144,12 @@ Plan section(s) and requirement IDs.
 
 ## Validation (required)
 Report:
-- Mapping coverage: every plan item → ticket (or “not ticketed” with reason)
+- Mapping coverage: every plan item → ticket (or "not ticketed" with reason)
 - No duplicate tickets created
 - Every ticket has: labels (collection + execution + domain), acceptance criteria, context files, traceability
 - Every dependency from the plan is encoded as `bd dep add`
-- Lock groups are chained (so concurrent terminals don’t collide)
+- Lock groups are chained (so concurrent terminals don't collide)
+- Every task ticket includes a Completion Protocol section
 
 ## Output (required)
 Print:
