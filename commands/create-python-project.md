@@ -69,7 +69,7 @@ $ARGUMENTS/
 9. **Initialize Python environment:**
    ```bash
    uv venv
-   source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+   uv sync --dev
    ```
 
 10. **Install and configure pre-commit:**
@@ -125,7 +125,7 @@ dev = [
 $ARGUMENTS = "$ARGUMENTS.main:main"
 
 [tool.ruff]
-line-length = 88
+line-length = 100
 target-version = "py311"
 src = ["src", "tests"]
 
@@ -242,7 +242,7 @@ Description of $ARGUMENTS.
 ```bash
 uv venv
 source .venv/bin/activate
-uv pip install -e ".[dev]"
+uv sync --dev
 ```
 
 ## Usage

@@ -1,7 +1,6 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run pbtourney *)",
       "Bash(curl *)",
       "Bash(cut *)",
       "Bash(find *)",

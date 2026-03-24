@@ -13,6 +13,25 @@ Portable [Claude Code](https://claude.ai/code) configuration. Tracks only the au
 
 Everything else in `~/.claude/` (sessions, debug logs, telemetry, plugin caches, project memory, etc.) is machine-generated and excluded.
 
+### CLAUDE.md structure
+
+The global `CLAUDE.md` has two sections:
+
+- **Universal rules** (top) — git workflow, agent autonomy, coding preferences, port management. These apply to every project.
+- **Language-specific rules** (bottom) — scoped under headings like "When Working in Python Projects". Claude applies these contextually based on what's in the repo.
+
+### Available commands
+
+| Command | Purpose |
+|---------|---------|
+| `/create-python-project` | Scaffold a new Python project with uv, ruff, pytest |
+| `/copu` | Commit and push with auto-generated message |
+| `/merge-to-main` | Run tests, commit, and merge branch to main |
+| `/plan-to-beads` | Convert implementation plans to Beads tickets |
+| `/cr-step-1` | Bug-finder agent (code review step 1) |
+| `/cr-step-2` | Adversarial review agent (code review step 2) |
+| `/cr-step-3` | Referee agent (code review step 3) |
+
 ## Setup
 
 ### Fresh machine (no existing `~/.claude/`)

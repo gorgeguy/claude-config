@@ -3,6 +3,8 @@ description: Run tests, commit staged work, and merge current branch to main via
 allowed-tools:
   - Bash(git *)
   - Bash(uv run *)
+  - Bash(npm test*)
+  - Bash(cargo test*)
   - Bash(bd *)
   - Bash(git-merge-to-main*)
   - Read
@@ -32,9 +34,12 @@ If this fails with a conflict, STOP and report the conflict to the user.
 
 ## Step 2: Run tests
 
-```bash
-uv run --frozen pytest
-```
+Detect the project type and run the appropriate test command:
+
+- If `pyproject.toml` exists → `uv run --frozen pytest`
+- If `package.json` exists → `npm test`
+- If `Cargo.toml` exists → `cargo test`
+- If none found → warn "No recognized test runner found" and skip to Step 3
 
 If tests fail, STOP and report failures to the user. Do not proceed with a broken build.
 
@@ -69,10 +74,7 @@ If this succeeds, report success and the merge commit.
    ```bash
    git merge main --ff
    ```
-2. Re-run tests:
-   ```bash
-   uv run --frozen pytest
-   ```
+2. Re-run tests using the same detection logic from Step 2.
 3. If tests pass, recommit if the merge created changes, then retry:
    ```bash
    git-merge-to-main
