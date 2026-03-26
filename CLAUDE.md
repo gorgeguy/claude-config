@@ -5,7 +5,6 @@ Universal rules apply always; language-specific sections apply only when
 that language is present in the project.
 
 ## Git Workflow
-- Do NOT include `Co-Authored-By` in commit messages
 - Use conventional commit messages: `feat:`, `fix:`, `docs:`, `refactor:`
 - Create feature branches: `feature/descriptive-name`
 - Run linting and formatting before commits
