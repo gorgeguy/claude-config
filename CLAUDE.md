@@ -52,6 +52,9 @@ Example:
 
 Apply these rules when the project contains Python code (pyproject.toml, *.py files, etc.).
 
+### Project Template
+When creating a new Python project, use **[gorgeguy/python-template](https://github.com/gorgeguy/python-template)** (local: `~/g/gorgeguy/python-template`) as the starting point. It includes pre-configured ruff rules, pyright, pre-commit hooks (including pylint W0621), GitHub Actions CI, Makefile, VS Code settings, and a CLAUDE.md with agent instructions. Copy it rather than starting from scratch.
+
 ### Package Management
 - ONLY use uv, NEVER pip
 - Installation: `uv add package`

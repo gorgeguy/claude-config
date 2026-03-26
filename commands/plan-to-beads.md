@@ -151,6 +151,19 @@ Report:
 - Lock groups are chained (so concurrent terminals don't collide)
 - Every task ticket includes a Completion Protocol section
 
+## Phase 5: Fresh-eyes audit (required)
+
+After all tickets are created, linked, and validated, run the `/audit-beads` process on the newly created issues. You MUST:
+
+1. Spawn a fresh Agent (subagent_type=general-purpose) with NO context from earlier phases — this is the "fresh eyes" requirement
+2. The agent should run `bd show <id>` for every issue created in this run (filter by the execution label)
+3. The agent checks every issue against the `/audit-beads` checklist: stale references, description/notes consistency, epic coherence, dependency graph correctness, missing test plans, and completion protocol accuracy
+4. For the 2-3 highest-severity issues, the agent should spot-check code claims (line numbers, function names, field types) against actual source files using Grep/Read
+5. If defects are found, fix them immediately — do NOT ask the user. This is a self-healing step built into the creation process.
+6. Report a summary: how many issues audited, how many defects found and fixed, how many are clean
+
+This step catches false findings, stale references, and inaccurate code claims BEFORE the user starts implementing — preventing wasted work on tickets that reference nonexistent bugs or wrong line numbers.
+
 ## Output (required)
 Print:
 1) The chosen collection label and execution label
@@ -158,3 +171,4 @@ Print:
 3) Commands executed
 4) `bd list -l <execution-label>`
 5) `bd ready -l <collection-label>` (if supported) or plain `bd ready` with a note on how to filter
+6) Audit results: defects found/fixed, clean count

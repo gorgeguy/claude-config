@@ -6,7 +6,6 @@ allowed-tools:
   - Bash(npm test*)
   - Bash(cargo test*)
   - Bash(bd *)
-  - Bash(git-merge-to-main*)
   - Read
 ---
 
@@ -61,10 +60,13 @@ If the working tree is clean, skip this step.
 Skip this step if already on `main`.
 
 ```bash
-git-merge-to-main
+MAIN_WT=$(git worktree list --porcelain | awk '/^worktree /{path=$2} /branch refs\/heads\/main/{print path}')
+BRANCH=$(git branch --show-current)
+git -C "$MAIN_WT" merge "$BRANCH" --ff-only
+git -C "$MAIN_WT" push
 ```
 
-**Note:** `git-merge-to-main` runs `git push` after merging. If no remote is configured, the push fails with exit code 128 even though the merge succeeded. Check the output — if you see `Fast-forward` and the file change summary, the merge worked. Ignore the push error in local-only repos.
+**Note:** The push runs after merging. If no remote is configured, the push fails with exit code 128 even though the merge succeeded. Check the output — if you see `Fast-forward` and the file change summary, the merge worked. Ignore the push error in local-only repos.
 
 If this succeeds, report success and the merge commit.
 
@@ -77,7 +79,10 @@ If this succeeds, report success and the merge commit.
 2. Re-run tests using the same detection logic from Step 2.
 3. If tests pass, recommit if the merge created changes, then retry:
    ```bash
-   git-merge-to-main
+   MAIN_WT=$(git worktree list --porcelain | awk '/^worktree /{path=$2} /branch refs\/heads\/main/{print path}')
+   BRANCH=$(git branch --show-current)
+   git -C "$MAIN_WT" merge "$BRANCH" --ff-only
+   git -C "$MAIN_WT" push
    ```
 4. If it still fails, STOP and report the situation to the user.
 
