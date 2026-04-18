@@ -35,7 +35,7 @@ that language is present in the project.
 
 IMPORTANT: Always use the `pm` CLI for port allocation. Never hardcode port numbers.
 
-- **Project name**: Use the top 2 directory levels of the git repo (e.g., `gorgeguy/pbtourney` for `/Users/jon/g/gorgeguy/pbtourney`)
+- **Project name**: Use the top 2 directory levels of the git repo (e.g., `<org>/<repo>` for `~/src/<org>/<repo>`)
   - Derive with: `git rev-parse --show-toplevel | rev | cut -d/ -f1-2 | rev`
 - **Workflow**: Query first, allocate if missing, then use the returned port
 - **Port names**: `serve` (dev server), `web` (frontend), `api` (backend), `db` (database), `cache` (redis)
