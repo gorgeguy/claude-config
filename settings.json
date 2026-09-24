@@ -25,28 +25,7 @@
   },
   "model": "opus[1m]",
   "skillOverrides": {
-    "cdec-review": "user-invocable-only",
-    "testing-conformance-harnesses": "user-invocable-only",
-    "testing-fuzzing": "user-invocable-only",
-    "testing-golden-artifacts": "user-invocable-only",
-    "testing-metamorphic": "user-invocable-only",
-    "testing-real-service-e2e-no-mocks": "user-invocable-only",
-    "extreme-software-optimization": "user-invocable-only",
-    "profiling-software-performance": "user-invocable-only",
-    "de-monolithize-your-codebase-isomorphically": "user-invocable-only",
-    "deadlock-finder-and-fixer": "user-invocable-only",
-    "installer-workmanship": "user-invocable-only",
-    "readme-writing": "user-invocable-only",
-    "changelog-md-workmanship": "user-invocable-only",
-    "de-slopify": "user-invocable-only",
-    "interactive-visualization-creator": "user-invocable-only",
-    "ui-polish": "user-invocable-only",
-    "ux-audit": "user-invocable-only",
-    "gh-actions": "user-invocable-only",
-    "library-updater": "user-invocable-only",
-    "research-software": "user-invocable-only",
-    "codebase-archaeology": "user-invocable-only",
-    "codebase-report": "user-invocable-only"
+    "cdec-review": "user-invocable-only"
   },
   "hooks": {
     "SessionStart": [
