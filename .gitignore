@@ -9,3 +9,14 @@
 !commands/
 !commands/**
 !statusline.sh
+!hooks/
+!hooks/**
+!scripts/
+!scripts/**
+
+# Hand-authored, general-purpose skills only. jsm-managed and synced skills
+# are reinstalled by their managers; work-specific skills live in private repos
+# (this repo is public).
+!skills/
+!skills/complete-minimum/
+!skills/complete-minimum/**

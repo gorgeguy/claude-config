@@ -5,141 +5,96 @@ Universal rules apply always; language-specific sections apply only when
 that language is present in the project.
 
 ## Git Workflow
+
 - Use conventional commit messages: `feat:`, `fix:`, `docs:`, `refactor:`
-- Create feature branches: `feature/descriptive-name`
-- Run linting and formatting before commits
-- Ensure tests pass before merging
 - Always merge, never rebase
+- Each agent works in its own worktree — the worktree containing its current
+  directory. Work on whatever branch that worktree has checked out; do not
+  create or switch branches unless asked.
+- Run linting, formatting, and the relevant tests before committing or
+  merging. Do not run a language's test suite when you haven't changed that
+  language's code.
 
 ## Agent Autonomy
-- Do NOT ask for confirmation between steps when executing a task. Work autonomously until the task is complete or you hit a genuine blocker.
 
-## AI Collaboration Guidelines
-- IMPORTANT: Always run tests after making changes
-- Ask me to update this CLAUDE.md when you learn new project patterns
-- Explain complex algorithms in comments and docstrings
-- Use meaningful variable names: `user_count` not `n`
-- Break large functions into smaller, testable pieces
-- YOU MUST validate that code changes don't break existing functionality
+- Do NOT ask for confirmation between steps when executing a task. Work
+  autonomously until the task is complete or you hit a genuine blocker.
 
-## Personal Preferences
-- Prefer explicit over implicit
-- Use early returns to reduce nesting
-- Keep functions under 50 lines when possible
-- Add TODO comments for known technical debt
-- Document why, not just what, in complex code sections
-- Always use frontend-design when new frontend design needs to be performed
-- Do not run language-specific tests when not making changes to that language's code
+## Task Tracking & Memory
 
-## Port Management
+- Use beads (`bd`) for task tracking wherever a beads workspace exists — not
+  TodoWrite/TaskCreate, even if the harness suggests them.
+- Use `bd remember` for durable insights; it is shared across agents.
 
-IMPORTANT: Always use the `pm` CLI for port allocation. Never hardcode port numbers.
+## Preferences
 
-- **Project name**: Use the top 2 directory levels of the git repo (e.g., `<org>/<repo>` for `~/src/<org>/<repo>`)
-  - Derive with: `git rev-parse --show-toplevel | rev | cut -d/ -f1-2 | rev`
-- **Workflow**: Query first, allocate if missing, then use the returned port
-- **Port names**: `serve` (dev server), `web` (frontend), `api` (backend), `db` (database), `cache` (redis)
-- **Port types** for allocation: `web` (8000-8999), `api` (3000-3999), `db` (5400-5499), `cache` (6300-6399)
+- Document why, not just what — explain non-obvious algorithms and
+  constraints in docstrings or comments.
+- Always use frontend-design when new frontend design needs to be performed.
 
-Example:
-  PROJECT=$(git rev-parse --show-toplevel | rev | cut -d/ -f1-2 | rev)
-  PORT=$(pm query "$PROJECT" serve 2>/dev/null || pm allocate "$PROJECT" serve | grep -oE '[0-9]+')
+## Durable References in Committed Artifacts
 
----
+Commits, code comments, docstrings, and maintained docs are read by people
+who don't share our session context: future you, other engineers/agents,
+and reviewers without access to your local trackers or environments. Keep
+references in committed artifacts to things that will still make sense to
+that reader.
+
+- **No Bead ticket IDs in commit messages, code, or docs.**
+  Treat beads as ephemeral as we don't share beads with other people.
+  Describe the bug or behavior in terms a reader can verify from
+  the code itself.
+- **No agent or session references.** Phrases like "as Codex flagged",
+  "per our review", or "based on the previous conversation" don't survive
+  context loss. State the observation directly.
+- **No local environment names.** Test-env hostnames, personal worktree
+  paths, sibling-repo aliases, customer-internal nicknames, and unreleased
+  internal tooling names tie the doc to one person's setup.
+- **Code references are durable; use them.** File paths, function/class/
+  symbol names, and module identifiers live in the codebase the reader is
+  looking at — prefer "see `_filter_already_processed`" over "see
+  ticket #1234".
+- **External stable references are fine.** RFCs, vendor docs at stable
+  URLs, and standards body specs.
+
+If context doesn't fit these rules but you need to preserve it, put it in
+the PR description (different audience, different lifecycle), not in the
+committed artifact.
 
 ## When Working in Python Projects
 
-Apply these rules when the project contains Python code (pyproject.toml, *.py files, etc.).
+Apply these rules when the project contains Python code (pyproject.toml,
+*.py files, etc.).
 
 ### Project Template
-When creating a new Python project, use **[gorgeguy/python-template](https://github.com/gorgeguy/python-template)** (local: `~/g/gorgeguy/python-template`) as the starting point. It includes pre-configured ruff rules, pyright, pre-commit hooks (including pylint W0621), GitHub Actions CI, Makefile, VS Code settings, and a CLAUDE.md with agent instructions. Copy it rather than starting from scratch.
+
+When creating a new Python project, use
+**[gorgeguy/python-template](https://github.com/gorgeguy/python-template)**
+(local: `~/g/gorgeguy/python-template`) as the starting point — copy it
+rather than starting from scratch. It includes pre-configured ruff rules,
+pyright, pre-commit hooks, GitHub Actions CI, Makefile, VS Code settings,
+and a CLAUDE.md with agent instructions. The template's ruff/pyright config
+is the style authority (line length, import order, quoting, f-strings) —
+rely on the linters rather than restating style rules.
 
 ### Package Management
+
 - ONLY use uv, NEVER pip
-- Installation: `uv add package`
-- Running tools: `uv run tool`
-- Upgrading: `uv add --dev package --upgrade-package package`
+- Installation: `uv add package`; running tools: `uv run tool`;
+  upgrading: `uv add --dev package --upgrade-package package`
 - FORBIDDEN: `uv pip install`, `@latest` syntax
 
-### Code Quality
-- Public APIs must have docstrings
-- Functions must be focused and small
-- Follow existing patterns exactly
-
 ### Testing
-- Framework: `uv run --frozen pytest`
-- Async testing: use anyio, not asyncio
-- Coverage: test edge cases and errors
-- New features require tests
-- Bug fixes require regression tests
-- Use descriptive test function names: `test_should_return_user_when_valid_id_provided`
-- Include docstrings for complex functions and classes
-- Test files should be named `test_*.py` or `*_test.py`
-- Run tests before committing: `uv run --frozen pytest -v`
-- Use coverage reporting: `pytest --cov=src`
 
-### Code Style
-- Follow PEP 8 for code style
-- Import order: standard library, third-party, local imports
-- Use type hints for all function parameters and return values
-- Line length: 100 chars maximum
-- Prefer f-strings over .format() or % formatting
-- Use pathlib.Path instead of os.path for file operations
+- Framework: `uv run --frozen pytest`; async testing uses anyio, not asyncio
+- New features require tests; bug fixes require regression tests; cover
+  edge cases and errors
+- Descriptive test names (`test_should_return_user_when_valid_id_provided`);
+  test files live in `tests/` and are named `test_*.py`
 
-### Code Formatting
+### Quality Gates
 
-1. Ruff
-   - Format: `uv run --frozen ruff format .`
-   - Check: `uv run --frozen ruff check .`
-   - Fix: `uv run --frozen ruff check . --fix`
-   - Critical issues:
-     - Line length (100 chars)
-     - Import sorting (I001)
-     - Unused imports
-   - Line wrapping:
-     - Strings: use parentheses
-     - Function calls: multi-line with proper indent
-     - Imports: split into multiple lines
-
-2. Type Checking
-   - Tool: `uv run --frozen pyright`
-   - Requirements:
-     - Explicit None checks for Optional
-     - Type narrowing for strings
-     - Version warnings can be ignored if checks pass
-
-3. Pre-commit
-   - Config: `.pre-commit-config.yaml`
-   - Runs: on git commit
-   - Tools: Prettier (YAML/JSON), Ruff (Python)
-   - Ruff updates:
-     - Check PyPI versions
-     - Update config rev
-     - Commit config first
-
-### Project Structure
-- Source code in `src/` directory when possible
-- Tests in `tests/` directory mirroring src structure
-- Configuration files in project root
-- Use `__init__.py` files even if empty (for clarity)
-- Keep related functionality in modules, not single large files
-
-### Error Handling & Logging
-- Use structured logging with the `logging` module
-- Prefer specific exception types over bare `except:`
-- Use context managers (`with` statements) for resource management
-- Always handle exceptions at appropriate levels
-- Use logging levels appropriately: DEBUG, INFO, WARNING, ERROR, CRITICAL
-
-### Dependencies & Security
-- Pin exact versions in production requirements
-- Use `uv` for dependency management
-- Use .env files for environment variables, never hardcode secrets
-- Validate input data with libraries like Pydantic when appropriate
-
-### Best Practices
-- Use list comprehensions over map/filter when readable
-- Prefer `pathlib.Path` over string manipulation for file paths
-- Use `dataclasses` or `Pydantic` models for structured data
-- Consider `asyncio` for I/O-bound operations
-- Profile before optimizing: use `cProfile` or `py-spy`
+- Format: `uv run --frozen ruff format .` — Lint: `uv run --frozen ruff
+  check . --fix` — Types: `uv run --frozen pyright`
+- Public APIs must have docstrings; use type hints on function signatures
+- Use `.env` files for secrets; never hardcode them

@@ -6,39 +6,56 @@
       "Bash(find *)",
       "Bash(tree *)",
       "Bash(git *)",
-      "Bash(git-merge-to-main*)",
       "Bash(bd *)",
+      "Bash(claim-bead *)",
       "Bash(oci *)",
-      "Bash(mgrep *)",
       "Bash(npm run *)",
-      "Bash(pm *)"
+      "Bash(cat *)",
+      "Bash(test *)",
+      "Bash(mkdir *)",
+      "Bash(ls *)",
+      "Bash(echo *)"
     ],
-    "deny": [],
-    "ask": []
+    "deny": [
+      "TodoWrite",
+      "TaskCreate"
+    ],
+    "ask": [],
+    "defaultMode": "auto"
+  },
+  "model": "opus[1m]",
+  "skillOverrides": {
+    "cdec-review": "user-invocable-only",
+    "testing-conformance-harnesses": "user-invocable-only",
+    "testing-fuzzing": "user-invocable-only",
+    "testing-golden-artifacts": "user-invocable-only",
+    "testing-metamorphic": "user-invocable-only",
+    "testing-real-service-e2e-no-mocks": "user-invocable-only",
+    "extreme-software-optimization": "user-invocable-only",
+    "profiling-software-performance": "user-invocable-only",
+    "de-monolithize-your-codebase-isomorphically": "user-invocable-only",
+    "deadlock-finder-and-fixer": "user-invocable-only",
+    "installer-workmanship": "user-invocable-only",
+    "readme-writing": "user-invocable-only",
+    "changelog-md-workmanship": "user-invocable-only",
+    "de-slopify": "user-invocable-only",
+    "interactive-visualization-creator": "user-invocable-only",
+    "ui-polish": "user-invocable-only",
+    "ux-audit": "user-invocable-only",
+    "gh-actions": "user-invocable-only",
+    "library-updater": "user-invocable-only",
+    "research-software": "user-invocable-only",
+    "codebase-archaeology": "user-invocable-only",
+    "codebase-report": "user-invocable-only"
   },
   "hooks": {
-    "PreCompact": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bd prime"
-          }
-        ]
-      }
-    ],
     "SessionStart": [
       {
         "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "bd prime"
-          },
-          {
-            "type": "command",
-            "command": "echo '--- Port Allocations ---' && pm list 2>/dev/null || echo 'No pm allocations found'"
+            "command": "~/.claude/hooks/bd-global-memories.sh"
           }
         ]
       }
@@ -49,16 +66,13 @@
     "command": "~/.claude/statusline.sh"
   },
   "enabledPlugins": {
-    "example-skills@anthropic-agent-skills": false,
     "frontend-design@claude-plugins-official": true,
-    "mgrep@Mixedbread-Grep": false,
     "typescript-lsp@claude-plugins-official": true,
     "pyright-lsp@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "slack@claude-plugins-official": true,
     "beads@beads-marketplace": true,
     "code-simplifier@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
     "playground@claude-plugins-official": true,
     "autofix-bot@claude-plugins-official": true
@@ -67,11 +81,26 @@
     "beads-marketplace": {
       "source": {
         "source": "github",
-        "repo": "steveyegge/beads"
+        "repo": "gastownhall/beads"
       }
     }
   },
   "outputStyle": "Explanatory",
-  "effortLevel": "high",
-  "skipDangerousModePermissionPrompt": true
+  "effortLevel": "xhigh",
+  "modelSettings": {
+    "claude-fable-5-1": {
+      "effortLevel": "high"
+    },
+    "claude-opus-5": {
+      "effortLevel": "xhigh"
+    },
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  },
+  "tui": "fullscreen",
+  "skipDangerousModePermissionPrompt": true,
+  "todoFeatureEnabled": false,
+  "agentPushNotifEnabled": true,
+  "skipAutoPermissionPrompt": true
 }
