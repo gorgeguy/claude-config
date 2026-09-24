@@ -2,35 +2,46 @@
 
 Portable [Claude Code](https://claude.ai/code) configuration. Tracks only the authored config files — everything machine-generated is gitignored via an allowlist pattern.
 
+**This repository is public.** Never commit secrets, employer-internal material, or work-specific skills here. `settings.local.json` is untracked for exactly this reason: permission rules saved by "always allow" record the full command text, including any credential typed inline.
+
 ## What's included
 
-| File | Purpose |
+| Path | Purpose |
 |------|---------|
 | `CLAUDE.md` | Global instructions loaded into every conversation |
-| `settings.json` | Permissions, hooks, enabled plugins, output style |
+| `settings.json` | Permissions, hooks, enabled plugins, skill overrides, output style |
 | `commands/*.md` | Custom slash commands |
-| `statusline.sh` | Custom status line script |
+| `hooks/` | Hook scripts referenced by `settings.json` |
+| `scripts/` | Standalone utilities for analyzing Claude Code session logs |
+| `skills/complete-minimum/` | Hand-authored, general-purpose skill |
+| `statusline.sh` | Status line: context usage plus 5-hour / 7-day rate limits |
 
-Everything else in `~/.claude/` (sessions, debug logs, telemetry, plugin caches, project memory, etc.) is machine-generated and excluded.
+Anything `settings.json` references must be tracked too, or a fresh clone runs hooks that don't exist.
+
+Not tracked:
+
+- Other `skills/*` — installed by the `jsm` skill manager (see `skills/.SKILLS_MANAGED_BY_JSM`), synced from claude.ai (`skills/synced/`), or work-specific and kept in private repos.
+- Sessions, project memory, plugin caches, history, and other machine-generated state.
 
 ### CLAUDE.md structure
 
-The global `CLAUDE.md` has two sections:
-
-- **Universal rules** (top) — git workflow, agent autonomy, coding preferences, port management. These apply to every project.
+- **Universal rules** (top) — git workflow, agent autonomy, task tracking with beads, and rules for durable references in committed artifacts.
 - **Language-specific rules** (bottom) — scoped under headings like "When Working in Python Projects". Claude applies these contextually based on what's in the repo.
 
-### Available commands
+### Commands
 
 | Command | Purpose |
 |---------|---------|
-| `/create-python-project` | Scaffold a new Python project with uv, ruff, pytest |
-| `/copu` | Commit and push with auto-generated message |
-| `/merge-to-main` | Run tests, commit, and merge branch to main |
-| `/plan-to-beads` | Convert implementation plans to Beads tickets |
-| `/cr-step-1` | Bug-finder agent (code review step 1) |
-| `/cr-step-2` | Adversarial review agent (code review step 2) |
-| `/cr-step-3` | Referee agent (code review step 3) |
+| `/make-beads <plan>` | Convert an implementation plan into dependency-linked, parallel-safe Beads tickets, then audit them |
+| `/audit-beads` | Fresh-eyes audit of all open beads, then fix the defects |
+| `/drain-beads [filter]` | Driver loop: dispatch one worker sub-agent at a time to claim and complete ready beads until the queue is empty. Requires `claim-bead` on `PATH`. |
+| `/merge-to-main` | Commit, merge main, test, fast-forward main from a worktree branch, push, close beads |
+
+### Hooks
+
+| Hook | Event | Purpose |
+|------|-------|---------|
+| `hooks/bd-global-memories.sh` | SessionStart | Prints cross-project `bd remember --global` memories into every session. No-op when `~/.beads-global` isn't set up. |
 
 ## Setup
 
@@ -64,7 +75,7 @@ git commit -m "sync with claude-config"
 
 ### Machine-specific overrides
 
-Use `settings.local.json` (not tracked) for per-machine settings like machine-specific tool permissions. It layers on top of `settings.json`.
+Use `settings.local.json` (not tracked) for per-machine settings like machine-specific tool permissions. It layers on top of `settings.json`. Review it occasionally: it accumulates one rule per "always allow" click.
 
 ## Updating
 
@@ -72,6 +83,7 @@ After editing config in `~/.claude/`:
 
 ```bash
 cd ~/.claude
+git status          # confirm nothing private is about to be published
 git add -A
 git commit -m "update config"
 git push
@@ -85,8 +97,11 @@ cd ~/.claude && git pull
 
 ## Reinstalling plugins
 
-`settings.json` records which plugins are enabled, but the plugin binaries aren't tracked. After cloning on a new machine, reinstall plugins with:
+`settings.json` records which plugins are enabled, but the plugin code isn't tracked. After cloning on a new machine, install each plugin listed under `enabledPlugins`:
 
 ```bash
-claude plugins install
+jq -r '.enabledPlugins | to_entries[] | select(.value) | .key' ~/.claude/settings.json \
+  | xargs -n1 claude plugin install
 ```
+
+Plugins from a third-party marketplace (listed under `extraKnownMarketplaces`) need that marketplace added first with `claude plugin marketplace add <owner/repo>`.

@@ -137,18 +137,46 @@ This protocol ensures the ticket graph is a living, self-correcting system —
 each completed ticket makes remaining tickets *more* accurate, not less.
 
 ## Creation order (required)
-1) Create epics
-2) Create tasks and attach to epics if Beads supports it (otherwise reference epic in body)
-3) Add ALL hard deps using `bd dep add` after IDs exist
-4) Re-run `bd ready` and sanity-check that claimable tickets make sense
+1) Create epics with `bd create --type=epic ...`
+2) Create child tasks with `bd create --parent <epic-id> ...`. Beads has first-class
+   hierarchical parent/child; do NOT use a description-body fallback like
+   `Epic: <id>`. The `--parent` flag is the ONLY mechanism that makes
+   `bd list --parent <epic-id>`, `bd epic status <epic-id>`, and
+   `bd epic close-eligible` work. If you forget it, the epic looks empty
+   regardless of how many tasks you created. Reparent existing children with
+   `bd update <child-id> --parent <epic-id>`.
+3) Add ALL hard deps using `bd dep add` after IDs exist. This is independent of
+   `--parent`: parent/child controls hierarchy and gating; `bd dep add` controls
+   `bd ready` ordering. Both must be set when both apply.
+   - For each ticket's "Hard deps" list, run `bd dep add <ticket> <dep>` once per dep.
+   - For lock-chained ticket groups (§ Parallel-safety), chain them serially via
+     `bd dep add` so only the first is ready at a time.
+   - Soft deps stay in prose only — never encode as `bd dep add`.
+4) Verify the graph before declaring done:
+   - `bd list --parent <epic-id>` MUST list every child task created in this run.
+   - `bd epic status <epic-id>` MUST report a non-zero child count.
+   - `bd dep tree <terminal-fan-in-ticket>` MUST show every upstream ticket the
+     plan said it depends on (use the smoke/verify ticket as the fan-in root).
+   - `bd ready` and sanity-check that claimable tickets match the plan's
+     "first wave" — anything that should be parallel-claimable must appear;
+     anything that should serialize behind a lock or dep must NOT.
 
 ## Validation (required)
 Report:
 - Mapping coverage: every plan item → ticket (or "not ticketed" with reason)
 - No duplicate tickets created
 - Every ticket has: labels (collection + execution + domain), acceptance criteria, context files, traceability
+- **Parent linkage**: every non-epic ticket created in this run has its `parent`
+  field set to the correct epic. Verify by running `bd list --parent <epic-id>`
+  for every epic created and confirming the count matches the number of children
+  this run produced. A description-body line like `Epic: <id>` does NOT count —
+  the `parent` field on the ticket itself is what beads uses.
 - Every dependency from the plan is encoded as `bd dep add`
 - Lock groups are chained (so concurrent terminals don't collide)
+- **Sibling DAG matches the plan**: for the terminal fan-in ticket of each
+  workstream (typically the smoke/verify/integration step), `bd dep tree <id>`
+  must reproduce the plan's prereq graph. Mismatches mean either a missed
+  `bd dep add` or a plan item not ticketed.
 - Every task ticket includes a Completion Protocol section
 
 ## Phase 5: Fresh-eyes audit (required)
