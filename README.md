@@ -20,7 +20,7 @@ Anything `settings.json` references must be tracked too, or a fresh clone runs h
 
 Not tracked:
 
-- Other `skills/*` — installed by the `jsm` skill manager (see `skills/.SKILLS_MANAGED_BY_JSM`), synced from claude.ai (`skills/synced/`), or work-specific and kept in private repos.
+- Other `skills/*` — synced from claude.ai (`skills/synced/`), or work-specific and kept in private repos.
 - Sessions, project memory, plugin caches, history, and other machine-generated state.
 
 ### CLAUDE.md structure
