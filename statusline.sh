@@ -15,14 +15,18 @@ FIVE_H_RESETS=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty
 SEVEN_D=$(echo "$input" | jq -r '(.rate_limits.seven_day.used_percentage // "-") | if type == "number" then round else . end')
 SEVEN_D_RESETS=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
 
+# Format a Unix epoch portably: GNU date uses -d @EPOCH (Linux), BSD date uses -r EPOCH (macOS).
+# On GNU, -r means "use this FILE's mtime", so the macOS form silently fails there.
+epoch_fmt() { date -d "@$1" +"$2" 2>/dev/null || date -r "$1" +"$2"; }
+
 if [[ -n "$FIVE_H_RESETS" ]]; then
-  FIVE_H_RESET=$(date -r "$FIVE_H_RESETS" +"%H:%M")
+  FIVE_H_RESET=$(epoch_fmt "$FIVE_H_RESETS" "%H:%M")
 else
   FIVE_H_RESET="-"
 fi
 
 if [[ -n "$SEVEN_D_RESETS" ]]; then
-  SEVEN_D_RESET=$(date -r "$SEVEN_D_RESETS" +"%a %H:%M")
+  SEVEN_D_RESET=$(epoch_fmt "$SEVEN_D_RESETS" "%a %H:%M")
 else
   SEVEN_D_RESET="-"
 fi
